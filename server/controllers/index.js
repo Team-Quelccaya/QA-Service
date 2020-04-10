@@ -11,10 +11,10 @@ module.exports = {
     const query = (val) => {
       return {
         text: `select questions.* , answers.* from questions join answers on answers.q_id = questions.q_id where questions.p_id=${val};`,
-        rowMode: "array",
+        rowMode: "object",
       };
     };
-    pool.query(query(val)).then((response) => {
+    pool.query(query(47)).then((response) => {
       res.send(response.rows);
       console.log("sucess");
     });
@@ -25,11 +25,11 @@ module.exports = {
     const query = (val) => {
       return {
         text: `UPDATE questions SET helpfulness = helpfulness + 1 WHERE q_id = ${val};`,
-        rowMode: "array",
+        rowMode: "object",
       };
     };
     pool.query(query(val)).then((response) => {
-      res.send(response.rows);
+      res.sendStatus(201);
       console.log("sucess");
     });
   },
@@ -37,11 +37,11 @@ module.exports = {
     const query = (val) => {
       return {
         text: `UPDATE questions SET reported = reported + 1 WHERE q_id = ${val};`,
-        rowMode: "array",
+        rowMode: "object",
       };
     };
     pool.query(query(val)).then((response) => {
-      res.send(response.rows);
+      res.sendStatus(201);
       console.log("sucess");
     });
   },
@@ -49,11 +49,11 @@ module.exports = {
     const query = (val) => {
       return {
         text: `UPDATE answers SET helpfulness = helpfulness + 1 WHERE a_id = ${val};`,
-        rowMode: "array",
+        rowMode: "object",
       };
     };
     pool.query(query(val)).then((response) => {
-      res.send(response.rows);
+      res.sendStatus(201);
       console.log("sucess");
     });
   },
@@ -61,11 +61,11 @@ module.exports = {
     const query = (val) => {
       return {
         text: `UPDATE answers SET reported = reported + 1 WHERE a_id = ${val};`,
-        rowMode: "array",
+        rowMode: "object",
       };
     };
     pool.query(query(val)).then((response) => {
-      res.send(response.rows);
+      res.sendStatus(201);
       console.log("sucess");
     });
   },
