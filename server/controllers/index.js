@@ -14,15 +14,59 @@ module.exports = {
         rowMode: "array",
       };
     };
-    pool.query(query(2)).then((response) => {
+    pool.query(query(val)).then((response) => {
       res.send(response.rows);
       console.log("sucess");
     });
   },
   addQuestion: (req, res) => {},
   addAnswer: (req, res) => {},
-  markQuestionHelpful: (req, res) => {},
-  reportQuestion: (req, res) => {},
-  markAnswerHelpful: (req, res) => {},
-  reportAnswer: (req, res) => {},
+  markQuestionHelpful: (req, res) => {
+    const query = (val) => {
+      return {
+        text: `UPDATE questions SET helpfulness = helpfulness + 1 WHERE q_id = ${val};`,
+        rowMode: "array",
+      };
+    };
+    pool.query(query(val)).then((response) => {
+      res.send(response.rows);
+      console.log("sucess");
+    });
+  },
+  reportQuestion: (req, res) => {
+    const query = (val) => {
+      return {
+        text: `UPDATE questions SET reported = reported + 1 WHERE q_id = ${val};`,
+        rowMode: "array",
+      };
+    };
+    pool.query(query(val)).then((response) => {
+      res.send(response.rows);
+      console.log("sucess");
+    });
+  },
+  markAnswerHelpful: (req, res) => {
+    const query = (val) => {
+      return {
+        text: `UPDATE answers SET helpfulness = helpfulness + 1 WHERE a_id = ${val};`,
+        rowMode: "array",
+      };
+    };
+    pool.query(query(val)).then((response) => {
+      res.send(response.rows);
+      console.log("sucess");
+    });
+  },
+  reportAnswer: (req, res) => {
+    const query = (val) => {
+      return {
+        text: `UPDATE answers SET reported = reported + 1 WHERE a_id = ${val};`,
+        rowMode: "array",
+      };
+    };
+    pool.query(query(val)).then((response) => {
+      res.send(response.rows);
+      console.log("sucess");
+    });
+  },
 };
