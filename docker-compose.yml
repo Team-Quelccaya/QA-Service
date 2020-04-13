@@ -1,0 +1,29 @@
+db:
+  image: postgres
+
+sdcqa:
+  build: .
+  links:
+    - db
+  environment:
+    - PGHOST=localhost
+    - PGDATABASE=sdc
+    - PGPORT=5432
+    - PGUSER=mattbrown
+# version: "3.7"
+# services:
+#     db:
+#         image: postgres
+#         environment:
+#             POSTGRES_USER: mattbrown
+#             POSTGRES_DB: sdc
+
+#         ports:
+#             - "5432:5432"
+
+#     web:
+#         image:
+#         depends_on:
+#             -db
+#         ports:
+#             - "4000:4000"
