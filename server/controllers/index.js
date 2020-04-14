@@ -12,7 +12,8 @@ module.exports = {
     var id = req.params.id;
     const query = (val) => {
       return {
-        text: `select * from questions where p_id =${id} ;`,
+        // text: `select * from questions where p_id =${id} ;`,
+        text: `select * from questions left join answers on questions.q_id = answers.q_id left join photos on photos.a_id = answers.a_id where questions.p_id = ${id};`,
         rowMode: "object",
       };
     };
@@ -123,7 +124,7 @@ module.exports = {
       };
     };
     pool.query(query(id)).then((response) => {
-      res.send(response);
+      res.sendStatus(201);
       console.log("sucess");
     });
   },
