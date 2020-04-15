@@ -1,8 +1,10 @@
+var moment = require("moment");
+
 const Pool = require("pg").Pool;
 const pool = new Pool({
   user: "postgres",
   password: "postgres",
-  host: "localhost",
+  host: "34.228.230.86",
   database: "qaservice",
   port: 5432,
 });
@@ -10,6 +12,7 @@ const pool = new Pool({
 module.exports = {
   getAllQuestions: (req, res) => {
     var id = req.params.id;
+
     const query = (val) => {
       return {
         // text: `select * from questions where p_id =${id} ;`,
@@ -18,8 +21,46 @@ module.exports = {
       };
     };
     pool.query(query()).then((response) => {
-      console.log(response.rows);
-      res.send(response.rows);
+      let questions = { product_id: id, results: [] };
+      let countedQuestions = {};
+
+      response.rows.forEach((q) => {
+        if (!countedQuestions[q.q_body]) {
+          let questionObj = {
+            question_id: q.q_id,
+            question_body: q.q_body,
+            question_date: q.q_date,
+            asker_name: q.q_asker_name,
+            question_helpfulness: q.q_helpfulness,
+            reported: q.q_reported,
+            answers: {
+              [q.q_body]: {
+                id: q.a_id,
+                body: q.a_body,
+                date: q.a_date,
+                answerer_name: q.a_ans_name,
+                helpfulness: q.a_helpfulness,
+                photos: [],
+              },
+            },
+          };
+          countedQuestions[q.q_body] = questionObj;
+        } else {
+          let answerObj = {
+            id: q.a_id,
+            body: q.a_body,
+            date: q.a_date,
+            answerer_name: q.a_ans_name,
+            helpfulness: q.a_helpfulness,
+            photos: [],
+          };
+          countedQuestions[q.q_body].answers[q.a_id] = answerObj;
+        }
+      });
+
+      questions.results = Object.values(countedQuestions);
+      console.log("questions", questions);
+      res.send(questions);
       console.log("sucess");
     });
   },
@@ -42,11 +83,12 @@ module.exports = {
   },
   addQuestion: (req, res) => {
     var id = req.params.id;
+    let date = moment().format();
     console.log("hellllo00", req.body);
     const query = (val) => {
       console.log("vallll", val);
       return {
-        text: `INSERT INTO questions (q_id, p_id, q_body, q_asker_name, q_reported, q_helpfulness, q_asker_email) VALUES ((SELECT MAX(q_id) from "questions") + 1, ${val},'${req.body.body}','${req.body.name}', 0, 0, '${req.body.email}')`,
+        text: `INSERT INTO questions (q_id, p_id, q_body, q_asker_name, q_reported, q_helpfulness, q_asker_email, q_date) VALUES ((SELECT MAX(q_id) from "questions") + 1, ${val},'${req.body.body}','${req.body.name}', 0, 0, '${req.body.email}', '${date}')`,
         rowMode: "object",
       };
     };
