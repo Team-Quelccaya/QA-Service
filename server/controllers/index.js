@@ -13,15 +13,12 @@ module.exports = {
     const query = (val) => {
       return {
         // text: `select * from questions where p_id =${id} ;`,
-        text: `select * from questions left join answers on questions.q_id = answers.q_id left join photos on photos.a_id = answers.a_id where questions.p_id = ${id};`,
+        text: `select * from questions left outer join answers on questions.q_id = answers.q_id where questions.p_id = ${id} ;`,
         rowMode: "object",
       };
     };
     pool.query(query()).then((response) => {
-      let idArray = response.rows.map((q) => {
-        return q.q_id;
-      });
-      console.log(idArray);
+      console.log(response.rows);
       res.send(response.rows);
       console.log("sucess");
     });
@@ -45,7 +42,7 @@ module.exports = {
   },
   addQuestion: (req, res) => {
     var id = req.params.id;
-
+    console.log("hellllo00", req.body);
     const query = (val) => {
       console.log("vallll", val);
       return {
