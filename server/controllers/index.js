@@ -12,15 +12,13 @@ module.exports = {
     var id = req.params.id;
     const query = (val) => {
       return {
-        text: `select * from questions where p_id =${id} ;`,
+        // text: `select * from questions where p_id =${id} ;`,
+        text: `select * from questions left outer join answers on questions.q_id = answers.q_id where questions.p_id = ${id} ;`,
         rowMode: "object",
       };
     };
     pool.query(query()).then((response) => {
-      let idArray = response.rows.map((q) => {
-        return q.q_id;
-      });
-      console.log(idArray);
+      console.log(response.rows);
       res.send(response.rows);
       console.log("sucess");
     });
@@ -44,7 +42,7 @@ module.exports = {
   },
   addQuestion: (req, res) => {
     var id = req.params.id;
-
+    console.log("hellllo00", req.body);
     const query = (val) => {
       console.log("vallll", val);
       return {
@@ -123,7 +121,7 @@ module.exports = {
       };
     };
     pool.query(query(id)).then((response) => {
-      res.send(response);
+      res.sendStatus(201);
       console.log("sucess");
     });
   },
