@@ -1,26 +1,36 @@
 var moment = require("moment");
 
 const Pool = require("pg").Pool;
+// const pool = new Pool({
+//   user: "postgres",
+//   password: "postgres",
+//   host: "34.228.230.86",
+//   database: "qaservice",
+//   port: 5432,
+// });
+
 const pool = new Pool({
   user: "postgres",
   password: "postgres",
-  host: "34.228.230.86",
+  host: "localhost",
   database: "qaservice",
   port: 5432,
 });
 
 module.exports = {
   getAllQuestions: (req, res) => {
+    console.log("made it here", req.params.id);
     var id = req.params.id;
 
     const query = (val) => {
       return {
         // text: `select * from questions where p_id =${id} ;`,
-        text: `select * from questions left outer join answers on questions.q_id = answers.q_id where questions.p_id = ${id} ;`,
+        text: `select * from answers right outer join questions on questions.q_id = answers.q_id where questions.p_id  = ${id} ;`,
         rowMode: "object",
       };
     };
     pool.query(query()).then((response) => {
+      console.log(response.rows);
       let questions = { product_id: id, results: [] };
       let countedQuestions = {};
 
@@ -40,28 +50,27 @@ module.exports = {
                 date: q.a_date,
                 answerer_name: q.a_ans_name,
                 helpfulness: q.a_helpfulness,
-                photos: [],
+                photos: [q.url],
               },
             },
           };
           countedQuestions[q.q_body] = questionObj;
-        } else {
+        } else if (q.a_id !== null) {
           let answerObj = {
             id: q.a_id,
             body: q.a_body,
             date: q.a_date,
             answerer_name: q.a_ans_name,
             helpfulness: q.a_helpfulness,
-            photos: [],
+            photos: [q.url],
           };
           countedQuestions[q.q_body].answers[q.a_id] = answerObj;
         }
       });
 
       questions.results = Object.values(countedQuestions);
-      console.log("questions", questions);
+
       res.send(questions);
-      console.log("sucess");
     });
   },
   getAnswers: (req, res) => {
@@ -85,17 +94,29 @@ module.exports = {
     var id = req.params.id;
     let date = moment().format();
     console.log("hellllo00", req.body);
-    const query = (val) => {
-      console.log("vallll", val);
+    const findLargestQuery = "select max(q_id) from questions";
+    const query = (val, largest) => {
       return {
-        text: `INSERT INTO questions (q_id, p_id, q_body, q_asker_name, q_reported, q_helpfulness, q_asker_email, q_date) VALUES ((SELECT MAX(q_id) from "questions") + 1, ${val},'${req.body.body}','${req.body.name}', 0, 0, '${req.body.email}', '${date}')`,
+        text: `INSERT INTO questions (q_id, p_id, q_body, q_asker_name, q_reported, q_helpfulness, q_asker_email, q_date) VALUES (${
+          largest + 1
+        }, ${val},'${req.body.body}','${req.body.name}', 0, 0, '${
+          req.body.email
+        }', '${date}')`,
         rowMode: "object",
       };
     };
-    pool.query(query(id)).then((response) => {
-      res.sendStatus(201);
-      console.log("sucess");
-    });
+
+    pool
+      .query(findLargestQuery)
+      .then((response) => {
+        const largest = Number(response.rows[0].max);
+        return largest;
+      })
+      .then((response) => {
+        pool.query(query(id, response)).then((response) => {
+          res.sendStatus(201);
+        });
+      });
   },
   addAnswer: (req, res) => {
     var id = req.params.id;
