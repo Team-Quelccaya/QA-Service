@@ -120,19 +120,30 @@ module.exports = {
   },
   addAnswer: (req, res) => {
     var id = req.params.id;
-    console.log(req.body);
+    let date = moment().format().slice(0, 10);
 
-    const query = (val) => {
-      console.log("vallll", val);
+    const findLargestQuery = "select max(a_id) from answers";
+    const query = (val, largest) => {
       return {
-        text: `INSERT INTO answers (a_id, q_id, a_body, a_ans_name, a_reported, a_helpfulness, a_ans_email) VALUES ((SELECT MAX(a_id) from "answers") + 1, ${val},'${req.body.body}','${req.body.name}', 0, 0, '${req.body.email}')`,
+        text: `INSERT INTO answers (a_id, q_id, a_body, a_ans_name, a_reported, a_helpfulness, a_ans_email, a_date) VALUES (${
+          largest + 1
+        }, ${val},'${req.body.body}','${req.body.name}', 0, 0, '${
+          req.body.email
+        }', '${date}')`,
         rowMode: "object",
       };
     };
-    pool.query(query(id)).then((response) => {
-      res.sendStatus(201);
-      console.log("sucess");
-    });
+    pool
+      .query(findLargestQuery)
+      .then((response) => {
+        const largest = Number(response.rows[0].max);
+        return largest;
+      })
+      .then((response) => {
+        pool.query(query(id, response)).then((response) => {
+          res.sendStatus(201);
+        });
+      });
   },
   markQuestionHelpful: (req, res) => {
     var id = req.params.id;
