@@ -19,18 +19,16 @@ const pool = new Pool({
 
 module.exports = {
   getAllQuestions: (req, res) => {
-    console.log("made it here", req.params.id);
     var id = req.params.id;
 
     const query = (val) => {
       return {
         // text: `select * from questions where p_id =${id} ;`,
-        text: `select * from answers right outer join questions on questions.q_id = answers.q_id where questions.p_id  = ${id} ;`,
+        text: `select * from answers right outer join questions on questions.q_id = answers.q_id left outer join photos on photos.a_id = answers.a_id where questions.p_id  = ${id} ;`,
         rowMode: "object",
       };
     };
     pool.query(query()).then((response) => {
-      console.log(response.rows);
       let questions = { product_id: id, results: [] };
       let countedQuestions = {};
 
@@ -85,15 +83,14 @@ module.exports = {
       let idArray = response.rows.map((q) => {
         return q.q_id;
       });
-      console.log(idArray);
+
       res.send(response.rows);
-      console.log("sucess");
     });
   },
   addQuestion: (req, res) => {
     var id = req.params.id;
     let date = moment().format();
-    console.log("hellllo00", req.body);
+
     const findLargestQuery = "select max(q_id) from questions";
     const query = (val, largest) => {
       return {
@@ -148,7 +145,6 @@ module.exports = {
   markQuestionHelpful: (req, res) => {
     var id = req.params.id;
     const query = (val) => {
-      console.log("vallll", val);
       return {
         text: `UPDATE questions SET q_helpfulness = q_helpfulness + 1 WHERE q_id = ${val};`,
         rowMode: "object",
@@ -156,7 +152,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
   markAnswerHelpful: (req, res) => {
@@ -169,7 +164,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
   reportQuestion: (req, res) => {
@@ -182,7 +176,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
 
@@ -196,7 +189,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
 };
