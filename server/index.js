@@ -10,8 +10,16 @@ app.use(bodyParser.json());
 
 const PORT = 8080;
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
+// app.get("/", (req, res) => {
+//   res.send("Hello World");
+// });
+
+app.get("/hello", (req, res) => {
+  res.send("Hello");
+});
+
+app.get("/loaderio-505864aad5f833129731fea7caff475d", (req, res) => {
+  res.send("loaderio-505864aad5f833129731fea7caff475d");
 });
 
 app.use(function (req, res, next) {

@@ -2,7 +2,7 @@ CREATE TABLE questions (
  q_id BIGSERIAL,
  p_id INTEGER,
  q_body VARCHAR(200),
- q_date DATE,
+ q_date VARCHAR(50),
  q_asker_name VARCHAR(100),
  q_asker_email VARCHAR(100),
  q_reported INTEGER,
@@ -16,7 +16,7 @@ CREATE TABLE answers (
  a_id BIGSERIAL,
  q_id INTEGER,
  a_body VARCHAR(1000),
- a_date DATE,
+ a_date VARCHAR(200),
  a_ans_name VARCHAR(100),
  a_ans_email VARCHAR(150),
  a_reported INTEGER,
@@ -29,7 +29,7 @@ ALTER TABLE answers ADD CONSTRAINT answers_pkey PRIMARY KEY (a_id);
 CREATE TABLE photos (
  photo_id BIGSERIAL,
  a_id INTEGER,
- p_url VARCHAR(300)
+ url VARCHAR(300)
 );
 
 
