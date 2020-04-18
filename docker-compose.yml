@@ -1,18 +1,8 @@
 version: "3"
 services:
-  myapp:
-    container_name: mbrown98/sdcserver
-    restart: always
+  redis-server:
+    image: "redis"
+  node-app:
     build: .
     ports:
       - "8080:8080"
-
-    links:
-      - redis
-      - mongo
-  mongo:
-    container_name: myapp-mongo
-    image: "mongo:4"
-  redis:
-    container_name: myapp-redis
-    image: "redis:4.0.11"

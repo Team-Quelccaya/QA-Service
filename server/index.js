@@ -4,19 +4,13 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const path = require("path");
 const router = require("./routes");
+
 var redis = require("redis");
 
-var client = redis.createClient();
+// Simply pass the port that you want a Redis server to listen on.
 
 app.use(morgan("dev"));
 app.use(bodyParser.json());
-
-client.on("connect", function () {
-  console.log("connected");
-});
-client.on("error", (err) => {
-  console.log("Error " + err);
-});
 
 const PORT = 8080;
 

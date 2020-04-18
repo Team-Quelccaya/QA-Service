@@ -1,6 +1,7 @@
 var moment = require("moment");
 var redis = require("redis");
-var client = redis.createClient();
+
+var client = redis.createClient({ host: "54.174.163.192", port: 6379 });
 
 const Pool = require("pg").Pool;
 // const pool = new Pool({
