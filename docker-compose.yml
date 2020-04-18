@@ -1,29 +1,18 @@
-db:
-  image: postgres
+version: "3"
+services:
+  myapp:
+    container_name: mbrown98/sdcserver
+    restart: always
+    build: .
+    ports:
+      - "8080:8080"
 
-sdcqa:
-  build: .
-  links:
-    - db
-  environment:
-    - PGHOST=localhost
-    - PGDATABASE=sdc
-    - PGPORT=5432
-    - PGUSER=mattbrown
-# version: "3.7"
-# services:
-#     db:
-#         image: postgres
-#         environment:
-#             POSTGRES_USER: mattbrown
-#             POSTGRES_DB: sdc
-
-#         ports:
-#             - "5432:5432"
-
-#     web:
-#         image:
-#         depends_on:
-#             -db
-#         ports:
-#             - "4000:4000"
+    links:
+      - redis
+      - mongo
+  mongo:
+    container_name: myapp-mongo
+    image: "mongo:4"
+  redis:
+    container_name: myapp-redis
+    image: "redis:4.0.11"

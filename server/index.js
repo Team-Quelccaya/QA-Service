@@ -4,9 +4,19 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const path = require("path");
 const router = require("./routes");
+var redis = require("redis");
+
+var client = redis.createClient();
 
 app.use(morgan("dev"));
 app.use(bodyParser.json());
+
+client.on("connect", function () {
+  console.log("connected");
+});
+client.on("error", (err) => {
+  console.log("Error " + err);
+});
 
 const PORT = 8080;
 
@@ -18,8 +28,8 @@ app.get("/hello", (req, res) => {
   res.send("Hello");
 });
 
-app.get("/loaderio-505864aad5f833129731fea7caff475d", (req, res) => {
-  res.send("loaderio-505864aad5f833129731fea7caff475d");
+app.get("/loaderio-2dc0ce488c819f9a0c8c689c55fdbe8d", (req, res) => {
+  res.send("loaderio-2dc0ce488c819f9a0c8c689c55fdbe8d");
 });
 
 app.use(function (req, res, next) {
