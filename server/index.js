@@ -5,6 +5,10 @@ const morgan = require("morgan");
 const path = require("path");
 const router = require("./routes");
 
+var redis = require("redis");
+
+// Simply pass the port that you want a Redis server to listen on.
+
 app.use(morgan("dev"));
 app.use(bodyParser.json());
 
@@ -18,8 +22,8 @@ app.get("/hello", (req, res) => {
   res.send("Hello");
 });
 
-app.get("/loaderio-505864aad5f833129731fea7caff475d", (req, res) => {
-  res.send("loaderio-505864aad5f833129731fea7caff475d");
+app.get("/loaderio-ae15179c0f70e63e972ee9d0fa199b72", (req, res) => {
+  res.send("loaderio-ae15179c0f70e63e972ee9d0fa199b72");
 });
 
 app.use(function (req, res, next) {

@@ -1,76 +1,79 @@
 var moment = require("moment");
+var redis = require("redis");
 
 const Pool = require("pg").Pool;
-// const pool = new Pool({
-//   user: "postgres",
-//   password: "postgres",
-//   host: "34.228.230.86",
-//   database: "qaservice",
-//   port: 5432,
-// });
 
 const pool = new Pool({
   user: "postgres",
   password: "postgres",
-  host: "localhost",
+  host: "3.91.93.167",
   database: "qaservice",
   port: 5432,
 });
 
 module.exports = {
   getAllQuestions: (req, res) => {
-    console.log("made it here", req.params.id);
     var id = req.params.id;
 
-    const query = (val) => {
-      return {
-        // text: `select * from questions where p_id =${id} ;`,
-        text: `select * from answers right outer join questions on questions.q_id = answers.q_id where questions.p_id  = ${id} ;`,
-        rowMode: "object",
-      };
-    };
-    pool.query(query()).then((response) => {
-      console.log(response.rows);
-      let questions = { product_id: id, results: [] };
-      let countedQuestions = {};
+    return client.get(`${id}`, (err, result) => {
+      if (result) {
+        const resultJSON = JSON.parse(result);
+        return res.send(resultJSON);
+      } else {
+        const query = (val) => {
+          return {
+            // text: `select * from questions where p_id =${id} ;`,
+            text: `select * from answers right outer join questions on questions.q_id = answers.q_id left outer join photos on photos.a_id = answers.a_id where questions.p_id  = ${id} ;`,
+            rowMode: "object",
+          };
+        };
+        pool.query(query()).then((response) => {
+          let questions = { product_id: id, results: [] };
+          let countedQuestions = {};
 
-      response.rows.forEach((q) => {
-        if (!countedQuestions[q.q_body]) {
-          let questionObj = {
-            question_id: q.q_id,
-            question_body: q.q_body,
-            question_date: q.q_date,
-            asker_name: q.q_asker_name,
-            question_helpfulness: q.q_helpfulness,
-            reported: q.q_reported,
-            answers: {
-              [q.q_body]: {
+          response.rows.forEach((q) => {
+            if (!countedQuestions[q.q_body]) {
+              let questionObj = {
+                question_id: q.q_id,
+                question_body: q.q_body,
+                question_date: q.q_date,
+                asker_name: q.q_asker_name,
+                question_helpfulness: q.q_helpfulness,
+                reported: q.q_reported,
+                answers: {
+                  [q.q_body]: {
+                    id: q.a_id,
+                    body: q.a_body,
+                    date: q.a_date,
+                    answerer_name: q.a_ans_name,
+                    helpfulness: q.a_helpfulness,
+                    photos: [q.url],
+                  },
+                },
+              };
+              countedQuestions[q.q_body] = questionObj;
+            } else if (q.a_id !== null) {
+              let answerObj = {
                 id: q.a_id,
                 body: q.a_body,
                 date: q.a_date,
                 answerer_name: q.a_ans_name,
                 helpfulness: q.a_helpfulness,
                 photos: [q.url],
-              },
-            },
-          };
-          countedQuestions[q.q_body] = questionObj;
-        } else if (q.a_id !== null) {
-          let answerObj = {
-            id: q.a_id,
-            body: q.a_body,
-            date: q.a_date,
-            answerer_name: q.a_ans_name,
-            helpfulness: q.a_helpfulness,
-            photos: [q.url],
-          };
-          countedQuestions[q.q_body].answers[q.a_id] = answerObj;
-        }
-      });
+              };
+              countedQuestions[q.q_body].answers[q.a_id] = answerObj;
+            }
+          });
 
-      questions.results = Object.values(countedQuestions);
-
-      res.send(questions);
+          questions.results = Object.values(countedQuestions);
+          client.setex(
+            `${id}`,
+            3600,
+            JSON.stringify({ source: "Redis Cache", ...questions })
+          );
+          res.send(questions);
+        });
+      }
     });
   },
   getAnswers: (req, res) => {
@@ -85,15 +88,14 @@ module.exports = {
       let idArray = response.rows.map((q) => {
         return q.q_id;
       });
-      console.log(idArray);
+
       res.send(response.rows);
-      console.log("sucess");
     });
   },
   addQuestion: (req, res) => {
     var id = req.params.id;
     let date = moment().format();
-    console.log("hellllo00", req.body);
+
     const findLargestQuery = "select max(q_id) from questions";
     const query = (val, largest) => {
       return {
@@ -148,7 +150,6 @@ module.exports = {
   markQuestionHelpful: (req, res) => {
     var id = req.params.id;
     const query = (val) => {
-      console.log("vallll", val);
       return {
         text: `UPDATE questions SET q_helpfulness = q_helpfulness + 1 WHERE q_id = ${val};`,
         rowMode: "object",
@@ -156,7 +157,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
   markAnswerHelpful: (req, res) => {
@@ -169,7 +169,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
   reportQuestion: (req, res) => {
@@ -182,7 +181,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
 
@@ -196,7 +194,6 @@ module.exports = {
     };
     pool.query(query(id)).then((response) => {
       res.sendStatus(201);
-      console.log("sucess");
     });
   },
 };
