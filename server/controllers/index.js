@@ -1,16 +1,7 @@
 var moment = require("moment");
 var redis = require("redis");
 
-var client = redis.createClient({ host: "54.174.163.192", port: 6379 });
-
 const Pool = require("pg").Pool;
-// const pool = new Pool({
-//   user: "postgres",
-//   password: "postgres",
-//   host: "34.228.230.86",
-//   database: "qaservice",
-//   port: 5432,
-// });
 
 const pool = new Pool({
   user: "postgres",
@@ -75,13 +66,11 @@ module.exports = {
           });
 
           questions.results = Object.values(countedQuestions);
-
           client.setex(
             `${id}`,
             3600,
             JSON.stringify({ source: "Redis Cache", ...questions })
           );
-
           res.send(questions);
         });
       }
